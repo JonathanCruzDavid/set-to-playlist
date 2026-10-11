@@ -26,7 +26,7 @@ STATUS_ICON = {"matched": "OK ", "uncertain": "?? ", "unmatched": "-- "}
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="djset2spotify",
+        prog="set-to-playlist",
         description="Turn a YouTube DJ set's tracklist into a Spotify playlist.",
     )
     p.add_argument("url", nargs="?", help="YouTube video URL (or ID)")

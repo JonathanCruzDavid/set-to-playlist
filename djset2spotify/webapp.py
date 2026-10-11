@@ -231,5 +231,5 @@ def run() -> None:
     if host not in ("127.0.0.1", "localhost", "::1"):
         host = os.getenv("HOST", "127.0.0.1")
         port = int(os.getenv("PORT", "8888"))
-    print(f"\n  DJ Set -> Spotify running at http://{host}:{port}\n")
+    print(f"\n  Set to Playlist running at http://{host}:{port}\n")
     create_app(settings).run(host=host, port=port, debug=os.getenv("FLASK_DEBUG") == "1")

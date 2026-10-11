@@ -1,6 +1,6 @@
-# DJ Set → Spotify Playlist
+# Set → Playlist
 
-Paste a YouTube link to a DJ set and get a Spotify playlist of every track in it.
+Paste a YouTube link to a DJ set and get a Spotify playlist of every track in it, then mix it like a DJ with Spotify's built-in Mix feature.
 
 The app reads the tracklist from the video description (or the comments, if the description doesn't have one), finds each track on Spotify, and creates the playlist on your account. It also includes a guide for turning that playlist into a DJ-style mix with Spotify's built-in **Mix** feature.
 
@@ -22,8 +22,8 @@ It runs two ways:
 ### 1. Install (Python 3.10+)
 
 ```bash
-git clone https://github.com/JonathanCruzDavid/djset-to-spotify.git
-cd djset-to-spotify
+git clone https://github.com/JonathanCruzDavid/set-to-playlist.git
+cd set-to-playlist
 python -m venv .venv
 ```
 
@@ -131,7 +131,7 @@ The **transition checker** on the web page applies these rules for you.
 ## Project layout
 
 ```
-djset-to-spotify/
+set-to-playlist/
 ├── app.py                    # web entry point
 ├── cli.py                    # CLI entry point
 ├── requirements.txt

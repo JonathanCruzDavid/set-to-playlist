@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Set to Playlist</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 6.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/></svg>
+      </span>
+      <span>Set&nbsp;<span class="arrow">→</span>&nbsp;Playlist</span>
+    </div>
+    <div id="account" class="account">
+      <span class="muted">Checking…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="alerts"></div>
+
+    <!-- Step 1 -->
+    <section class="card" id="step-load">
+      <div class="step-head">
+        <span class="step-num">1</span>
+        <div>
+          <h2>Load a DJ set</h2>
+          <p class="muted">Paste a YouTube link. We'll read the tracklist from the description, or from the comments if the description doesn't have one.</p>
+        </div>
+      </div>
+      <form id="load-form" class="row">
+        <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off" spellcheck="false">
+        <button id="load-btn" class="btn primary" type="submit">Get tracklist</button>
+      </form>
+      <details class="manual">
+        <summary>Tracklist not in the description? Paste it here</summary>
+        <textarea id="manual" rows="8" placeholder="00:00 Artist - Title&#10;03:45 Artist - Title (Someone Remix)&#10;…"></textarea>
+        <p class="muted small">One track per line. Timestamps and numbering are optional. If a YouTube link is also filled in, we still use the video title for the playlist name.</p>
+      </details>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="card hidden" id="step-match">
+      <div class="video" id="video"></div>
+
+      <div class="toolbar">
+        <div class="step-head compact">
+          <span class="step-num">2</span>
+          <h2>Match on Spotify</h2>
+        </div>
+        <div class="toolbar-actions">
+          <button id="match-btn" class="btn primary">Match all tracks</button>
+        </div>
+      </div>
+
+      <div class="progress hidden" id="progress"><div class="bar" id="progress-bar"></div></div>
+      <div class="stats" id="stats"></div>
+
+      <div class="table-wrap">
+        <table class="tracks">
+          <thead>
+            <tr>
+              <th class="c-check"><input type="checkbox" id="check-all" title="Select all matched" aria-label="Select all matched"></th>
+              <th class="c-num">#</th>
+              <th class="c-time">Time</th>
+              <th>From the tracklist</th>
+              <th>Spotify match</th>
+              <th class="c-act"></th>
+            </tr>
+          </thead>
+          <tbody id="track-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card hidden" id="step-create">
+      <div class="step-head">
+        <span class="step-num">3</span>
+        <h2>Create the playlist</h2>
+      </div>
+      <div class="form-grid">
+        <label>Name
+          <input id="pl-name" type="text" maxlength="100">
+        </label>
+        <label>Description
+          <input id="pl-desc" type="text" maxlength="300">
+        </label>
+        <label class="switch">
+          <input id="pl-public" type="checkbox">
+          <span class="slider" aria-hidden="true"></span>
+          <span>Public playlist</span>
+        </label>
+      </div>
+      <div class="row end">
+        <button id="unmatched-btn" class="btn ghost" type="button">Download unmatched (.txt)</button>
+        <button id="create-btn" class="btn primary" type="button">Create playlist</button>
+      </div>
+      <div id="result"></div>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="card" id="step-mix">
+      <div class="step-head">
+        <span class="step-num">4</span>
+        <div>
+          <h2>Mix it in Spotify</h2>
+          <p class="muted">Use Spotify's built-in <b>Mix</b> button for DJ-style transitions. You need Spotify Premium; no other apps are required.</p>
+        </div>
+      </div>
+
+      <ol class="guide">
+        <li>
+          <b>Open the playlist in Spotify and click <span class="kbd">Mix</span></b> (next to <span class="kbd">+ Add</span>).
+          Spotify's AI sets an <span class="kbd">Auto</span> transition between every song. Click <span class="kbd">Save</span>; you can already press play and hear a full mix.
+        </li>
+        <li>
+          <b>Find the rough transitions.</b> Click an <span class="kbd">Auto</span> label to open <i>Edit transition</i>, then click ■ in the waveform to preview it.
+          Watch for two problems:
+          <ul>
+            <li><b>Big tempo jumps:</b> more than about 5 BPM between the two songs (e.g. 138 → 128).</li>
+            <li><b>Key clashes:</b> the key badges (e.g. <span class="key">8A</span> → <span class="key">4B</span>) aren't neighbours. Neighbours share a number (8A ↔ 8B) or sit one number apart with the same letter (8A ↔ 7A / 9A).</li>
+          </ul>
+        </li>
+        <li>
+          <b>Fix only those</b> by choosing a preset, then set the length using the bars button under the waveform:
+          <table class="guide-table">
+            <thead><tr><th>If the two songs…</th><th>Preset</th><th>Length</th></tr></thead>
+            <tbody>
+              <tr><td>Are close in tempo and the keys match</td><td><b>Blend</b></td><td>16 bars</td></tr>
+              <tr><td>Step up in energy or tempo, keys OK</td><td><b>Rise</b></td><td>8 bars</td></tr>
+              <tr><td>Have a big tempo jump or clashing keys</td><td><b>Fade</b></td><td>4 bars</td></tr>
+              <tr><td>Already sound good</td><td><b>Auto</b></td><td>leave it</td></tr>
+            </tbody>
+          </table>
+        </li>
+        <li><b>Click <span class="kbd">Save</span></b> after editing, then play from track 1.</li>
+      </ol>
+
+      <div class="checker">
+        <h3>Transition checker</h3>
+        <p class="muted small">Copy the BPM and key from the Edit transition panel (top song → bottom song).</p>
+        <form id="checker-form" class="checker-grid">
+          <fieldset>
+            <legend>Current song</legend>
+            <label>BPM <input id="ck-bpm-a" type="number" min="40" max="250" step="0.1" placeholder="138" required></label>
+            <label>Key <input id="ck-key-a" type="text" maxlength="3" placeholder="8A" required></label>
+          </fieldset>
+          <span class="checker-arrow" aria-hidden="true">→</span>
+          <fieldset>
+            <legend>Next song</legend>
+            <label>BPM <input id="ck-bpm-b" type="number" min="40" max="250" step="0.1" placeholder="128" required></label>
+            <label>Key <input id="ck-key-b" type="text" maxlength="3" placeholder="4B" required></label>
+          </fieldset>
+          <button class="btn primary" type="submit">Check</button>
+        </form>
+        <div id="checker-result" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer muted small">Runs locally. Your Spotify token is stored only in this browser's session cookie.</footer>
+
+  <template id="row-tpl">
+    <tr>
+      <td class="c-check"><input type="checkbox" class="sel"></td>
+      <td class="c-num"></td>
+      <td class="c-time"></td>
+      <td class="c-src">
+        <div class="src-main"></div>
+        <div class="src-raw small muted"></div>
+        <form class="edit hidden">
+          <input type="text" class="edit-input" placeholder="Artist - Title">
+          <button class="btn small primary" type="submit">Search</button>
+          <button class="btn small ghost cancel" type="button">Cancel</button>
+        </form>
+      </td>
+      <td class="c-match"></td>
+      <td class="c-act">
+        <button class="btn icon edit-btn" type="button" title="Edit search" aria-label="Edit search">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25Zm17.7-10.2a1 1 0 0 0 0-1.42l-2.33-2.33a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/></svg>
+        </button>
+      </td>
+    </tr>
+  </template>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
